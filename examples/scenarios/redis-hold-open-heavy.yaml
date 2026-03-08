@@ -1,0 +1,28 @@
+version: v1
+name: redis-hold-open-heavy
+protocol: redis
+target:
+  host: 127.0.0.1
+  port: 6379
+auth:
+  password: redis
+  redis_db: 0
+workload:
+  pattern: hold-open
+  connections: 1000
+  connect_rate_per_sec: 250
+  duration: 90s
+  hold_time: 90s
+timeouts:
+  connect: 1s
+assertions:
+  max_error_rate_pct: 10
+  max_p95_connect_ms: 200
+safety:
+  max_connections_cap: 3000
+  private_network_only: true
+output:
+  report_dir: ./reports
+  prometheus:
+    enabled: true
+    listen_addr: 127.0.0.1:2112

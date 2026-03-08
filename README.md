@@ -59,6 +59,14 @@ go run ./cmd/lazy-tests run -f examples/scenarios/redis-connect-churn.yaml
 go run ./cmd/lazy-tests run -f examples/scenarios/mysql-hold-open.yaml --dry-run
 ```
 
+### Run for holyf-network focused scenarios
+
+```bash
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml
+```
+
 ## CLI Contract
 
 ```text
@@ -133,9 +141,25 @@ output:
 
 - [examples/scenarios/tcp-connect-churn.yaml](examples/scenarios/tcp-connect-churn.yaml)
 - [examples/scenarios/tcp-hold-open.yaml](examples/scenarios/tcp-hold-open.yaml)
+- [examples/scenarios/tcp-timewait-500.yaml](examples/scenarios/tcp-timewait-500.yaml)
+- [examples/scenarios/tcp-conntrack-storm.yaml](examples/scenarios/tcp-conntrack-storm.yaml)
+- [examples/scenarios/tcp-established-1k.yaml](examples/scenarios/tcp-established-1k.yaml)
+- [examples/scenarios/tcp-close-wait-pressure.yaml](examples/scenarios/tcp-close-wait-pressure.yaml)
+- [examples/scenarios/tcp-docker-nat.yaml](examples/scenarios/tcp-docker-nat.yaml)
 - [examples/scenarios/mysql-hold-open.yaml](examples/scenarios/mysql-hold-open.yaml)
+- [examples/scenarios/mysql-connect-storm.yaml](examples/scenarios/mysql-connect-storm.yaml)
 - [examples/scenarios/redis-connect-churn.yaml](examples/scenarios/redis-connect-churn.yaml)
+- [examples/scenarios/redis-hold-open-heavy.yaml](examples/scenarios/redis-hold-open-heavy.yaml)
 - [examples/scenarios/postgres-connect-churn.yaml](examples/scenarios/postgres-connect-churn.yaml)
+- [examples/scenarios/postgres-hold-open-heavy.yaml](examples/scenarios/postgres-hold-open-heavy.yaml)
+
+## holyf-network Test Catalog
+
+- Full testcase runbook: [docs/TEST_CASES.md](docs/TEST_CASES.md)
+- Companion labs:
+  - [labs/high-conntrack/README.md](labs/high-conntrack/README.md)
+  - [labs/nat/README.md](labs/nat/README.md)
+  - [labs/retrans/README.md](labs/retrans/README.md)
 
 ## High-Level Design
 

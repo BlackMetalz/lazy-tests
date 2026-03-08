@@ -53,6 +53,18 @@
 - Extend assertions in `internal/engine/assertions.go` without changing runner lifecycle.
 - Add extra output channels (e.g. OTEL, Kafka) by plugging into the event stream.
 
+## holyf-network Coverage Strategy
+
+- Native `lazy-tests` scenarios cover connection-oriented stress:
+  - churn and TIME_WAIT pressure
+  - high ESTABLISHED hold-open
+  - DB connect storms (MySQL/Redis/Postgres)
+- Hybrid lab helpers cover states that require external topology/behavior:
+  - deliberate `CLOSE_WAIT` accumulation (`labs/high-conntrack`)
+  - Docker NAT visibility (`labs/nat`)
+  - retransmission under path impairment (`labs/retrans`)
+- Full runbook and expectations are documented in `docs/TEST_CASES.md`.
+
 ## Runtime Flow
 
 1. CLI loads and validates scenario.

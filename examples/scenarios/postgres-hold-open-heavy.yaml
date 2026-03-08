@@ -1,0 +1,29 @@
+version: v1
+name: postgres-hold-open-heavy
+protocol: postgres
+target:
+  host: 127.0.0.1
+  port: 5432
+auth:
+  username: postgres
+  password: postgres
+  database: postgres
+workload:
+  pattern: hold-open
+  connections: 1000
+  connect_rate_per_sec: 250
+  duration: 90s
+  hold_time: 90s
+timeouts:
+  connect: 2s
+assertions:
+  max_error_rate_pct: 10
+  max_p95_connect_ms: 250
+safety:
+  max_connections_cap: 3000
+  private_network_only: true
+output:
+  report_dir: ./reports
+  prometheus:
+    enabled: true
+    listen_addr: 127.0.0.1:2112
