@@ -1,0 +1,22 @@
+version: v1
+name: tcp-hold-open
+protocol: tcp
+target:
+  host: 127.0.0.1
+  port: 3306
+workload:
+  pattern: hold-open
+  connections: 1000
+  connect_rate_per_sec: 200
+  duration: 60s
+  hold_time: 30s
+timeouts:
+  connect: 2s
+assertions:
+  max_error_rate_pct: 2
+  max_p95_connect_ms: 150
+safety:
+  max_connections_cap: 5000
+  private_network_only: true
+output:
+  report_dir: ./reports

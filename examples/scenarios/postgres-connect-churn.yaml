@@ -1,0 +1,28 @@
+version: v1
+name: postgres-connect-churn
+protocol: postgres
+target:
+  host: 127.0.0.1
+  port: 5432
+auth:
+  username: postgres
+  password: postgres
+  database: postgres
+workload:
+  pattern: connect-churn
+  connections: 400
+  connect_rate_per_sec: 150
+  duration: 45s
+timeouts:
+  connect: 2s
+assertions:
+  max_error_rate_pct: 3
+  max_p95_connect_ms: 180
+safety:
+  max_connections_cap: 3000
+  private_network_only: true
+output:
+  report_dir: ./reports
+  prometheus:
+    enabled: true
+    listen_addr: 127.0.0.1:2112

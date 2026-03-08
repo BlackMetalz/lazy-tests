@@ -1,0 +1,29 @@
+version: v1
+name: mysql-hold-open
+protocol: mysql
+target:
+  host: 127.0.0.1
+  port: 3306
+auth:
+  username: root
+  password: root
+  database: mysql
+workload:
+  pattern: hold-open
+  connections: 200
+  connect_rate_per_sec: 100
+  duration: 30s
+  hold_time: 20s
+timeouts:
+  connect: 2s
+assertions:
+  max_error_rate_pct: 5
+  max_p95_connect_ms: 200
+safety:
+  max_connections_cap: 2000
+  private_network_only: true
+output:
+  report_dir: ./reports
+  prometheus:
+    enabled: true
+    listen_addr: 127.0.0.1:2112
