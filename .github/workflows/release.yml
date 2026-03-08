@@ -1,0 +1,53 @@
+name: Release lazy-tests
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run tests
+        run: go test -v ./...
+
+      - name: Build Linux amd64
+        run: |
+          GOOS=linux GOARCH=amd64 \
+          go build -ldflags "-X main.version=${{ github.ref_name }}" \
+          -o lazy-tests-linux-amd64 ./cmd/lazy-tests
+
+      - name: Build macOS amd64
+        run: |
+          GOOS=darwin GOARCH=amd64 \
+          go build -ldflags "-X main.version=${{ github.ref_name }}" \
+          -o lazy-tests-darwin-amd64 ./cmd/lazy-tests
+
+      - name: Build macOS arm64 (Apple Silicon)
+        run: |
+          GOOS=darwin GOARCH=arm64 \
+          go build -ldflags "-X main.version=${{ github.ref_name }}" \
+          -o lazy-tests-darwin-arm64 ./cmd/lazy-tests
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            lazy-tests-linux-amd64
+            lazy-tests-darwin-amd64
+            lazy-tests-darwin-arm64
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
