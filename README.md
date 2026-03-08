@@ -164,7 +164,9 @@ output:
 
 ## holyf-network Test Catalog
 
+- One-case-per-file index: [docs/HOLYF_CASE_PACK.md](docs/HOLYF_CASE_PACK.md)
 - Full testcase runbook: [docs/TEST_CASES.md](docs/TEST_CASES.md)
+- Case runner helper: `scripts/run_holyf_case.sh <CASE_ID> [--run]`
 - Companion labs:
   - [labs/high-conntrack/README.md](labs/high-conntrack/README.md)
   - [labs/nat/README.md](labs/nat/README.md)

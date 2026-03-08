@@ -64,6 +64,7 @@
   - Docker NAT visibility (`labs/nat`)
   - retransmission under path impairment (`labs/retrans`)
 - Full runbook and expectations are documented in `docs/TEST_CASES.md`.
+- One-case-per-file pack is documented in `docs/HOLYF_CASE_PACK.md`.
 
 ## Runtime Flow
 

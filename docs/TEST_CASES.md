@@ -2,6 +2,10 @@
 
 This document is a practical test catalog for using `lazy-tests` to stress and validate `holyf-network` panels.
 
+If you want one-case-per-file format, use:
+
+- `docs/HOLYF_CASE_PACK.md`
+
 ## Coverage Summary
 
 | ID | Goal | Mode | Main command |
@@ -194,4 +198,3 @@ Run these after major collector or mitigation changes:
 5. `LAB-NAT-01`
 6. `LAB-RTR-01`
 7. `LAB-MIT-01`
-
