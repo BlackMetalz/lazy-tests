@@ -26,6 +26,15 @@ Go CLI framework for protocol-level connection stress tests.
   - `2`: assertion failure
 - Optional live Prometheus endpoint during run: `/metrics`
 
+## Download
+- Ubuntu
+```bash
+curl -sL https://github.com/BlackMetalz/lazy-tests/releases/latest/download/lazy-tests-linux-amd64 -o /tmp/lazy-tests
+chmod +x /tmp/lazy-tests
+sudo mv /tmp/lazy-tests /usr/local/bin/lazy-tests
+sudo lazy-tests
+```
+
 ## Install / Build
 
 ```bash
