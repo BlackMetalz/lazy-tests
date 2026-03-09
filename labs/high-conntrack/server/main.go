@@ -21,6 +21,7 @@ func main() {
 	leakCloseWait := flag.Bool("leak-close-wait", false, "intentionally keep sockets in CLOSE_WAIT after client close")
 	leakLimit := flag.Int("leak-limit", 5000, "maximum leaked CLOSE_WAIT sockets to keep")
 	statsEvery := flag.Duration("stats-every", 5*time.Second, "stats log interval")
+	logEvery := flag.Int("log-every", 100, "log every N accepts/leaks; set 0 to disable per-connection progress logs")
 	flag.Parse()
 
 	ln, err := net.Listen("tcp", *listenAddr)
@@ -58,14 +59,17 @@ func main() {
 			continue
 		}
 
-		totalAccepted.Add(1)
+		accepted := totalAccepted.Add(1)
 		active.Add(1)
+		if *logEvery > 0 && (accepted == 1 || accepted%int64(*logEvery) == 0) {
+			log.Printf("accept #%d remote=%s local=%s", accepted, conn.RemoteAddr(), conn.LocalAddr())
+		}
 
 		go func(c net.Conn) {
 			defer active.Add(-1)
 
 			if *leakCloseWait {
-				handleLeakCloseWait(c, *readTimeout, *leakLimit, &leakedMu, &leaked)
+				handleLeakCloseWait(c, *readTimeout, *leakLimit, &leakedMu, &leaked, *logEvery)
 				return
 			}
 
@@ -90,7 +94,7 @@ func main() {
 	}
 }
 
-func handleLeakCloseWait(c net.Conn, readTimeout time.Duration, leakLimit int, leakedMu *sync.Mutex, leaked *[]net.Conn) {
+func handleLeakCloseWait(c net.Conn, readTimeout time.Duration, leakLimit int, leakedMu *sync.Mutex, leaked *[]net.Conn, logEvery int) {
 	_ = c.SetReadDeadline(time.Now().Add(readTimeout))
 	buf := make([]byte, 1024)
 	for {
@@ -103,7 +107,11 @@ func handleLeakCloseWait(c net.Conn, readTimeout time.Duration, leakLimit int, l
 			leakedMu.Lock()
 			if len(*leaked) < leakLimit {
 				*leaked = append(*leaked, c)
+				leakedCount := len(*leaked)
 				leakedMu.Unlock()
+				if logEvery > 0 && (leakedCount == 1 || leakedCount%logEvery == 0) {
+					log.Printf("leaked CLOSE_WAIT #%d remote=%s local=%s", leakedCount, c.RemoteAddr(), c.LocalAddr())
+				}
 				return
 			}
 			leakedMu.Unlock()

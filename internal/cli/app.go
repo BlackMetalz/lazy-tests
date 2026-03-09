@@ -100,6 +100,19 @@ func (a *App) runCommand(args []string) int {
 		return 1
 	}
 
+	fmt.Fprintf(
+		a.stdout,
+		"starting run scenario=%s protocol=%s target=%s:%d pattern=%s duration=%s connections=%d rate=%d\n",
+		sc.Name,
+		sc.Protocol,
+		sc.Target.Host,
+		sc.Target.Port,
+		sc.Workload.Pattern,
+		sc.Workload.Duration,
+		sc.Workload.Connections,
+		sc.Workload.ConnectRatePerSec,
+	)
+
 	result, err := a.eng.Run(context.Background(), *sc, engine.RunOptions{
 		DryRun:             dryRun,
 		UnsafePublicTarget: unsafePublic,

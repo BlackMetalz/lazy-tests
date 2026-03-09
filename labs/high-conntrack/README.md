@@ -22,13 +22,23 @@ go run ./labs/high-conntrack/client -target 127.0.0.1:18080 -total 200000 -concu
 Start server with leak mode:
 
 ```bash
-go run ./labs/high-conntrack/server -listen :18080 -leak-close-wait -leak-limit 3000
+go run ./labs/high-conntrack/server -listen :18080 -leak-close-wait -leak-limit 3000 -log-every 1
 ```
 
 Then run lazy-tests scenario:
 
 ```bash
 go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml
+```
+
+Important:
+
+- A successful `lazy-tests` run is expected here.
+- The signal is server-side `CLOSE_WAIT`, not client-side failure.
+- Direct check on Linux:
+
+```bash
+./scripts/check_close_wait.sh 18080
 ```
 
 Or use standalone client with slow ramp:

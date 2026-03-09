@@ -61,10 +61,16 @@ CMD
     LAB-CW-01)
       cat <<'CMD'
 # terminal 1
-go run ./labs/high-conntrack/server -listen :18080 -leak-close-wait -leak-limit 3000
+go run ./labs/high-conntrack/server -listen :18080 -leak-close-wait -leak-limit 3000 -log-every 1
 
 # terminal 2
 go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml
+
+# terminal 3 (Linux verification)
+./scripts/check_close_wait.sh 18080
+
+# note:
+# success from lazy-tests is expected here; the target signal is server-side CLOSE_WAIT
 CMD
       ;;
     LAB-NAT-01)
