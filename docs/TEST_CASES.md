@@ -24,7 +24,7 @@ Do not edit `target.host` or `target.port` in the scenario templates just to swi
 | LAB-CW-01 | CLOSE_WAIT accumulation | hybrid | `lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml --target-host HOST --target-port 18080` |
 | LAB-NAT-01 | NAT visibility (`ct/nat`) | hybrid | `lazy-tests run -f examples/scenarios/tcp-docker-nat.yaml --target-host 127.0.0.1 --target-port 18080` |
 | LAB-RTR-01 | Retransmission thresholds | hybrid | netem lab + sustained traffic |
-| LAB-MIT-01 | holyf kill/block under storm | hybrid | run storm then trigger `k/Enter` in holyf |
+| LAB-MIT-01 | holyf kill/block under storm | hybrid | `high-conntrack server :18080 + lazy-tests client + holyf TUI` |
 
 ## Native Cases (lazy-tests only)
 
@@ -189,18 +189,29 @@ sudo tc qdisc del dev eth0 root
 
 ### LAB-MIT-01: block/kill convergence under storm
 
-- Why hybrid: verifies holyf active mitigation path (`k`, timed block, kill-only).
-- Steps:
-  1. run `tcp-conntrack-storm.yaml`.
-  2. in holyf live TUI, pick hot peer row and trigger `k/Enter`.
-  3. test both `minutes > 0` (block) and `minutes = 0` (kill-only).
+- Why hybrid: needs a target server plus a separate traffic generator so holyf can mitigate a real hot peer.
+- Topology:
+  - target host: run the bundled TCP server and holyf-network.
+  - client host: run `lazy-tests` against the target host on port `18080`.
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
+go run ./labs/high-conntrack/server -listen :18080 -read-timeout 5m -log-every 1000
+
+# timed block validation under churn pressure
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host <TARGET_HOST> --target-port 18080
+
+# kill-only validation with clearer active connection drop
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml --target-host <TARGET_HOST> --target-port 18080
 ```
 
+- In holyf live TUI:
+  - pick the hot peer row created by the client host.
+  - trigger `k/Enter`.
+  - test `minutes > 0` with the churn profile and `minutes = 0` with the hold-open profile.
+
 - Expected in holyf:
-  - active connections decrease for target peer.
+  - timed block suppresses new connections from that peer while the block is active.
+  - kill-only drops current active connections, but new attempts can reappear afterward.
   - under heavy race, partial convergence may appear (expected bounded behavior).
 
 ## Recommended Regression Bundle

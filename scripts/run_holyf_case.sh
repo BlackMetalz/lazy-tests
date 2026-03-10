@@ -94,13 +94,20 @@ CMD
       ;;
     LAB-MIT-01)
       cat <<'CMD'
-# terminal 1
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-8080}"
+# terminal 1 (target host)
+go run ./labs/high-conntrack/server -listen :18080 -read-timeout 5m -log-every 1000
 
-# terminal 2 (holyf-network TUI)
-# trigger k/Enter on hot peer row and test:
-# - minutes > 0 (timed block)
-# - minutes = 0 (kill-only)
+# terminal 2 (client host)
+# timed block validation under churn pressure
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-18080}"
+
+# kill-only validation with clearer active connection drop
+# go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-18080}"
+
+# terminal 3 (holyf-network TUI on target host)
+# select the hot peer row created by the client host, then test:
+# - minutes > 0 with the churn profile above
+# - minutes = 0 with the established profile above
 CMD
       ;;
     *)
