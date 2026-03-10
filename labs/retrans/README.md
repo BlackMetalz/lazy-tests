@@ -25,7 +25,7 @@ curl --http1.1 -L http://speedtest.tele2.net/1GB.zip -o /dev/null
 Option B (local target with lazy-tests connect storm):
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 ## 3) Observe holyf-network

@@ -9,6 +9,7 @@ Usage:
 Examples:
   scripts/run_holyf_case.sh LT-TCP-01
   scripts/run_holyf_case.sh LT-TCP-01 --run
+  TARGET_HOST=172.25.110.76 TARGET_PORT=8080 scripts/run_holyf_case.sh LT-TCP-01 --run
 USAGE
   exit 1
 fi
@@ -23,37 +24,37 @@ command_block() {
   case "$CASE_ID" in
     LT-TCP-01)
       cat <<'CMD'
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-8080}"
 CMD
       ;;
     LT-TCP-02)
       cat <<'CMD'
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-8080}"
 CMD
       ;;
     LT-TCP-03)
       cat <<'CMD'
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-8080}"
 CMD
       ;;
     LT-DB-01)
       cat <<'CMD'
-go run ./cmd/lazy-tests run -f examples/scenarios/mysql-connect-storm.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/mysql-connect-storm.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-3306}"
 CMD
       ;;
     LT-DB-02)
       cat <<'CMD'
-go run ./cmd/lazy-tests run -f examples/scenarios/redis-hold-open-heavy.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/redis-hold-open-heavy.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-6379}"
 CMD
       ;;
     LT-DB-03)
       cat <<'CMD'
-go run ./cmd/lazy-tests run -f examples/scenarios/postgres-hold-open-heavy.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/postgres-hold-open-heavy.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-5432}"
 CMD
       ;;
     LT-OBS-01)
       cat <<'CMD'
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-8080}"
 # while running:
 #   curl -s http://127.0.0.1:2112/metrics | rg lazy_tests_
 CMD
@@ -64,10 +65,10 @@ CMD
 go run ./labs/high-conntrack/server -listen :18080 -leak-close-wait -leak-limit 3000 -log-every 1
 
 # terminal 2
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --target-host <SERVER_IP>
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-18080}"
 
 # optional heavy pressure:
-# go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml --target-host <SERVER_IP>
+# go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-18080}"
 
 # terminal 3 (Linux verification)
 ./scripts/check_close_wait.sh 18080
@@ -79,7 +80,7 @@ CMD
     LAB-NAT-01)
       cat <<'CMD'
 docker compose -f labs/nat/docker-compose.yml up -d
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-docker-nat.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-docker-nat.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-18080}"
 # cleanup:
 # docker compose -f labs/nat/docker-compose.yml down
 CMD
@@ -94,7 +95,7 @@ CMD
     LAB-MIT-01)
       cat <<'CMD'
 # terminal 1
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host "${TARGET_HOST:-127.0.0.1}" --target-port "${TARGET_PORT:-8080}"
 
 # terminal 2 (holyf-network TUI)
 # trigger k/Enter on hot peer row and test:

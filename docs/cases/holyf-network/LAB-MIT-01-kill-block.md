@@ -8,7 +8,7 @@ Validate holyf active mitigation path (`k/Enter`) while traffic storm is running
 1. Start storm traffic:
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 2. In holyf live TUI:

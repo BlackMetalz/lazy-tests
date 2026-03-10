@@ -59,37 +59,47 @@ go run ./cmd/lazy-tests list drivers
 ### Run a test
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/redis-connect-churn.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/redis-connect-churn.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 ### Dry run (no sockets opened)
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/mysql-hold-open.yaml --dry-run
+go run ./cmd/lazy-tests run -f examples/scenarios/mysql-hold-open.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT> --dry-run
 ```
 
 ### Run for holyf-network focused scenarios
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --target-host <SERVER_IP>
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --target-host <TARGET_HOST> --target-port 18080
 ```
 
 ## CLI Contract
 
 ```text
-lazy-tests run -f <scenario.yaml> [--out ./reports] [--dry-run] [--unsafe-public-target]
+lazy-tests run -f <scenario.yaml> [--target-host HOST] [--target-port PORT] [--out ./reports] [--dry-run] [--unsafe-public-target]
 lazy-tests validate -f <scenario.yaml>
 lazy-tests list drivers
 ```
 
 Runtime overrides for `run`:
 
+- `--target-host`
+- `--target-port`
 - `--duration`
 - `--connections`
 - `--connect-rate-per-sec`
+
+Recommended workflow:
+
+```bash
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
+```
+
+Use CLI overrides for the real endpoint you want to test. Keep `target.host` and `target.port` in scenario YAML as defaults/fallbacks instead of editing the template every time.
 
 ## Scenario Schema (v1)
 
@@ -99,8 +109,8 @@ name: redis-connect-churn
 protocol: redis # tcp | mysql | redis | postgres
 
 target:
-  host: 127.0.0.1
-  port: 6379
+  host: 127.0.0.1 # default only; override at runtime with --target-host
+  port: 6379      # default only; override at runtime with --target-port
 
 auth:            # optional for tcp
   username: ""   # mysql/postgres

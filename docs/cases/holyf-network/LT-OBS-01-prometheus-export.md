@@ -6,7 +6,7 @@ Verify lazy-tests exposes `/metrics` while workload is active.
 ## Steps
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 In another terminal, curl the endpoint shown in summary (for example):

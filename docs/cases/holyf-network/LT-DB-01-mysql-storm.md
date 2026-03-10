@@ -6,7 +6,7 @@ Stress MySQL connect/auth path with high churn.
 ## Command
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/mysql-connect-storm.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/mysql-connect-storm.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 ## Expected in holyf-network

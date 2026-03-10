@@ -28,17 +28,18 @@ go run ./labs/high-conntrack/server -listen :18080 -leak-close-wait -leak-limit 
 Then run lazy-tests scenario:
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --target-host <SERVER_IP>
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --target-host <TARGET_HOST> --target-port 18080
 ```
 
 For heavier pressure:
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml --target-host <SERVER_IP>
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml --target-host <TARGET_HOST> --target-port 18080
 ```
 
 Important:
 
+- Use CLI overrides for the lab endpoint. Do not edit the scenario YAML target block.
 - A successful `lazy-tests` run is expected here.
 - The signal is server-side `CLOSE_WAIT`, not client-side failure.
 - In leak mode, default `-leak-read-timeout=0` waits indefinitely for peer FIN so sockets are less likely to fall back into `LAST_ACK` due timeout.

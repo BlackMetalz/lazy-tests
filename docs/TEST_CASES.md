@@ -6,20 +6,23 @@ If you want one-case-per-file format, use:
 
 - `docs/HOLYF_CASE_PACK.md`
 
+All commands below pass the real endpoint by CLI using `--target-host` and `--target-port`.
+Do not edit `target.host` or `target.port` in the scenario templates just to switch environments.
+
 ## Coverage Summary
 
 | ID | Goal | Mode | Main command |
 | --- | --- | --- | --- |
-| LT-TCP-01 | TIME_WAIT around 500 | native | `lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml` |
-| LT-TCP-02 | ESTABLISHED saturation (1k hold-open) | native | `lazy-tests run -f examples/scenarios/tcp-established-1k.yaml` |
-| LT-TCP-03 | Conntrack storm / high churn | native | `lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml` |
-| LT-DB-01 | MySQL connect storm | native | `lazy-tests run -f examples/scenarios/mysql-connect-storm.yaml` |
-| LT-DB-02 | Redis hold-open heavy | native | `lazy-tests run -f examples/scenarios/redis-hold-open-heavy.yaml` |
-| LT-DB-03 | Postgres hold-open heavy | native | `lazy-tests run -f examples/scenarios/postgres-hold-open-heavy.yaml` |
-| LT-SAFE-01 | Public target safety guardrail | native | run without `--unsafe-public-target` |
-| LT-OBS-01 | Prometheus endpoint export during run | native | any scenario with `output.prometheus.enabled: true` |
-| LAB-CW-01 | CLOSE_WAIT accumulation | hybrid | `labs/high-conntrack` + `tcp-close-wait-pressure.yaml` |
-| LAB-NAT-01 | NAT visibility (`ct/nat`) | hybrid | docker NAT lab + `tcp-docker-nat.yaml` |
+| LT-TCP-01 | TIME_WAIT around 500 | native | `lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml --target-host HOST --target-port PORT` |
+| LT-TCP-02 | ESTABLISHED saturation (1k hold-open) | native | `lazy-tests run -f examples/scenarios/tcp-established-1k.yaml --target-host HOST --target-port PORT` |
+| LT-TCP-03 | Conntrack storm / high churn | native | `lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host HOST --target-port PORT` |
+| LT-DB-01 | MySQL connect storm | native | `lazy-tests run -f examples/scenarios/mysql-connect-storm.yaml --target-host HOST --target-port PORT` |
+| LT-DB-02 | Redis hold-open heavy | native | `lazy-tests run -f examples/scenarios/redis-hold-open-heavy.yaml --target-host HOST --target-port PORT` |
+| LT-DB-03 | Postgres hold-open heavy | native | `lazy-tests run -f examples/scenarios/postgres-hold-open-heavy.yaml --target-host HOST --target-port PORT` |
+| LT-SAFE-01 | Public target safety guardrail | native | `lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host PUBLIC_HOST --target-port PUBLIC_PORT` |
+| LT-OBS-01 | Prometheus endpoint export during run | native | `lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host HOST --target-port PORT` |
+| LAB-CW-01 | CLOSE_WAIT accumulation | hybrid | `lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml --target-host HOST --target-port 18080` |
+| LAB-NAT-01 | NAT visibility (`ct/nat`) | hybrid | `lazy-tests run -f examples/scenarios/tcp-docker-nat.yaml --target-host 127.0.0.1 --target-port 18080` |
 | LAB-RTR-01 | Retransmission thresholds | hybrid | netem lab + sustained traffic |
 | LAB-MIT-01 | holyf kill/block under storm | hybrid | run storm then trigger `k/Enter` in holyf |
 
@@ -31,7 +34,7 @@ If you want one-case-per-file format, use:
 - Command:
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 - Expected in holyf:
@@ -44,7 +47,7 @@ go run ./cmd/lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml
 - Command:
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 - Expected in holyf:
@@ -57,7 +60,7 @@ go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml
 - Command:
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 - Expected in holyf:
@@ -70,7 +73,7 @@ go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml
 - Command:
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/mysql-connect-storm.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/mysql-connect-storm.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 - Expected in holyf:
@@ -83,7 +86,7 @@ go run ./cmd/lazy-tests run -f examples/scenarios/mysql-connect-storm.yaml
 - Command:
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/redis-hold-open-heavy.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/redis-hold-open-heavy.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 - Expected in holyf:
@@ -96,7 +99,7 @@ go run ./cmd/lazy-tests run -f examples/scenarios/redis-hold-open-heavy.yaml
 - Command:
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/postgres-hold-open-heavy.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/postgres-hold-open-heavy.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 - Expected in holyf:
@@ -107,8 +110,12 @@ go run ./cmd/lazy-tests run -f examples/scenarios/postgres-hold-open-heavy.yaml
 
 - Objective: verify accidental public-target tests are blocked.
 - Steps:
-  1. set scenario host to a public IP/FQDN.
-  2. run without `--unsafe-public-target`.
+  1. run against a public IP/FQDN via CLI overrides.
+  2. do not pass `--unsafe-public-target`.
+
+```bash
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host <PUBLIC_IP_OR_FQDN> --target-port <PUBLIC_PORT>
+```
 
 - Expected:
   - CLI exits with code `1` and guardrail error.
@@ -118,8 +125,12 @@ go run ./cmd/lazy-tests run -f examples/scenarios/postgres-hold-open-heavy.yaml
 - Objective: validate optional `/metrics` endpoint while run is active.
 - Steps:
   1. use any scenario with `output.prometheus.enabled: true`.
-  2. start run.
+  2. start run with explicit target overrides.
   3. curl endpoint printed in summary.
+
+```bash
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
+```
 
 - Expected:
   - endpoint responds with counters/histograms (`lazy_tests_*`).
@@ -134,7 +145,7 @@ go run ./cmd/lazy-tests run -f examples/scenarios/postgres-hold-open-heavy.yaml
 
 ```bash
 go run ./labs/high-conntrack/server -listen :18080 -leak-close-wait -leak-limit 3000 -log-every 1
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --target-host <SERVER_IP>
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --target-host <TARGET_HOST> --target-port 18080
 ```
 
 - Expected in holyf:
@@ -148,7 +159,7 @@ go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --targ
 
 ```bash
 docker compose -f labs/nat/docker-compose.yml up -d
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-docker-nat.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-docker-nat.yaml --target-host 127.0.0.1 --target-port 18080
 ```
 
 - Expected in holyf:
@@ -183,6 +194,10 @@ sudo tc qdisc del dev eth0 root
   1. run `tcp-conntrack-storm.yaml`.
   2. in holyf live TUI, pick hot peer row and trigger `k/Enter`.
   3. test both `minutes > 0` (block) and `minutes = 0` (kill-only).
+
+```bash
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
+```
 
 - Expected in holyf:
   - active connections decrease for target peer.

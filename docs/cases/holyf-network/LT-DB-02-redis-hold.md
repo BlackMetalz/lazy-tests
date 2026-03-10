@@ -6,7 +6,7 @@ Validate long-lived Redis pressure with large active socket count.
 ## Command
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/redis-hold-open-heavy.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/redis-hold-open-heavy.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 ## Expected in holyf-network

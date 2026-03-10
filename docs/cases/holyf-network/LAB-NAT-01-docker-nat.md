@@ -13,7 +13,7 @@ curl -I http://127.0.0.1:18080
 ## Traffic command
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-docker-nat.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-docker-nat.yaml --target-host 127.0.0.1 --target-port 18080
 ```
 
 ## Expected in holyf-network

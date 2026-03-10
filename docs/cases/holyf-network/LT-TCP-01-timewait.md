@@ -6,7 +6,7 @@ Create short-lived TCP churn to surface `TIME_WAIT` behavior in holyf.
 ## Command
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 ## Expected in holyf-network

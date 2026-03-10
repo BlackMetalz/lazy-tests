@@ -34,3 +34,4 @@ This is the focused case pack for validating `holyf-network` using `lazy-tests`.
 
 - Native cases run directly with `lazy-tests`.
 - Hybrid cases require extra topology/tools (`labs/` folder) for states that cannot be reliably forced by connect-only patterns.
+- Prefer `--target-host` and `--target-port` on every `lazy-tests run` command instead of editing the scenario YAML target block.

@@ -6,7 +6,7 @@ Hold a large number of active sockets to validate high `ESTABLISHED` visibility.
 ## Command
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml --target-host <TARGET_HOST> --target-port <TARGET_PORT>
 ```
 
 ## Expected in holyf-network
