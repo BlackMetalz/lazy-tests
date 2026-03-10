@@ -64,7 +64,10 @@ CMD
 go run ./labs/high-conntrack/server -listen :18080 -leak-close-wait -leak-limit 3000 -log-every 1
 
 # terminal 2
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --target-host <SERVER_IP>
+
+# optional heavy pressure:
+# go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml --target-host <SERVER_IP>
 
 # terminal 3 (Linux verification)
 ./scripts/check_close_wait.sh 18080

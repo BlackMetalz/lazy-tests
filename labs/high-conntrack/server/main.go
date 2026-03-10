@@ -15,6 +15,7 @@ import (
 func main() {
 	listenAddr := flag.String("listen", ":18080", "TCP listen address")
 	readTimeout := flag.Duration("read-timeout", 2*time.Second, "read timeout per connection")
+	leakReadTimeout := flag.Duration("leak-read-timeout", 0, "read timeout in leak-close-wait mode (0 = wait indefinitely for EOF)")
 	hold := flag.Duration("hold", 0, "how long to keep connection open before closing")
 	reply := flag.String("reply", "ok\n", "reply payload")
 	writeDelay := flag.Duration("write-delay", 0, "delay before writing reply")
@@ -32,7 +33,7 @@ func main() {
 
 	log.Printf("high-conntrack server listening on %s", *listenAddr)
 	if *leakCloseWait {
-		log.Printf("CLOSE_WAIT leak mode enabled (limit=%d)", *leakLimit)
+		log.Printf("CLOSE_WAIT leak mode enabled (limit=%d leak-read-timeout=%s)", *leakLimit, leakReadTimeout.String())
 	}
 
 	var totalAccepted atomic.Int64
@@ -69,7 +70,7 @@ func main() {
 			defer active.Add(-1)
 
 			if *leakCloseWait {
-				handleLeakCloseWait(c, *readTimeout, *leakLimit, &leakedMu, &leaked, *logEvery)
+				handleLeakCloseWait(c, *leakReadTimeout, *leakLimit, &leakedMu, &leaked, *logEvery)
 				return
 			}
 
@@ -95,9 +96,15 @@ func main() {
 }
 
 func handleLeakCloseWait(c net.Conn, readTimeout time.Duration, leakLimit int, leakedMu *sync.Mutex, leaked *[]net.Conn, logEvery int) {
-	_ = c.SetReadDeadline(time.Now().Add(readTimeout))
+	if readTimeout <= 0 {
+		_ = c.SetReadDeadline(time.Time{})
+	}
 	buf := make([]byte, 1024)
 	for {
+		if readTimeout > 0 {
+			_ = c.SetReadDeadline(time.Now().Add(readTimeout))
+		}
+
 		_, err := c.Read(buf)
 		if err == nil {
 			continue
@@ -115,6 +122,12 @@ func handleLeakCloseWait(c net.Conn, readTimeout time.Duration, leakLimit int, l
 				return
 			}
 			leakedMu.Unlock()
+		}
+
+		var nerr net.Error
+		if errors.As(err, &nerr) && nerr.Timeout() {
+			// Keep waiting for FIN from peer to accumulate CLOSE_WAIT in leak mode.
+			continue
 		}
 
 		_ = c.Close()

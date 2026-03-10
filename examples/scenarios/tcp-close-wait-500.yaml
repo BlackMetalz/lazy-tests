@@ -1,14 +1,14 @@
 version: v1
-name: tcp-close-wait-pressure
+name: tcp-close-wait-500
 protocol: tcp
 target:
   host: 127.0.0.1
   port: 18080
 workload:
   pattern: connect-churn
-  connections: 600
-  connect_rate_per_sec: 120
-  duration: 3m
+  connections: 500
+  connect_rate_per_sec: 80
+  duration: 5m
 timeouts:
   connect: 2s
 assertions:

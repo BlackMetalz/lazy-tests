@@ -74,6 +74,7 @@ go run ./cmd/lazy-tests run -f examples/scenarios/mysql-hold-open.yaml --dry-run
 go run ./cmd/lazy-tests run -f examples/scenarios/tcp-conntrack-storm.yaml
 go run ./cmd/lazy-tests run -f examples/scenarios/tcp-established-1k.yaml
 go run ./cmd/lazy-tests run -f examples/scenarios/tcp-timewait-500.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --target-host <SERVER_IP>
 ```
 
 ## CLI Contract
@@ -153,6 +154,7 @@ output:
 - [examples/scenarios/tcp-timewait-500.yaml](examples/scenarios/tcp-timewait-500.yaml)
 - [examples/scenarios/tcp-conntrack-storm.yaml](examples/scenarios/tcp-conntrack-storm.yaml)
 - [examples/scenarios/tcp-established-1k.yaml](examples/scenarios/tcp-established-1k.yaml)
+- [examples/scenarios/tcp-close-wait-500.yaml](examples/scenarios/tcp-close-wait-500.yaml)
 - [examples/scenarios/tcp-close-wait-pressure.yaml](examples/scenarios/tcp-close-wait-pressure.yaml)
 - [examples/scenarios/tcp-docker-nat.yaml](examples/scenarios/tcp-docker-nat.yaml)
 - [examples/scenarios/mysql-hold-open.yaml](examples/scenarios/mysql-hold-open.yaml)

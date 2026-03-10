@@ -132,8 +132,8 @@ go run ./cmd/lazy-tests run -f examples/scenarios/postgres-hold-open-heavy.yaml
 - Steps:
 
 ```bash
-go run ./labs/high-conntrack/server -listen :18080 -leak-close-wait -leak-limit 3000
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml
+go run ./labs/high-conntrack/server -listen :18080 -leak-close-wait -leak-limit 3000 -log-every 1
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --target-host <SERVER_IP>
 ```
 
 - Expected in holyf:

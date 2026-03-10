@@ -18,7 +18,13 @@ go run ./labs/high-conntrack/server -listen :18080 -leak-close-wait -leak-limit 
 ## Traffic command
 
 ```bash
-go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-500.yaml --target-host <SERVER_IP>
+```
+
+If you need stronger pressure, use:
+
+```bash
+go run ./cmd/lazy-tests run -f examples/scenarios/tcp-close-wait-pressure.yaml --target-host <SERVER_IP>
 ```
 
 ## Optional direct verification on Linux
