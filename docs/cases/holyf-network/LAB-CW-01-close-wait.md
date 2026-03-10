@@ -9,6 +9,8 @@ Force server-side `CLOSE_WAIT` to validate holyf state panel behavior.
 
 This case is not about client-side errors. It is about the server intentionally leaking accepted sockets after the client closes, so `CLOSE_WAIT` appears on the server side.
 
+Use the `half-close-hold` scenario for stable `CLOSE_WAIT` levels. Pure close churn can peak then decay when client-side half-closed sockets are reaped by the OS.
+
 ## Setup
 
 ```bash

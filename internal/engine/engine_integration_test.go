@@ -106,6 +106,52 @@ func TestRun_ConnectChurn_ProducesLatencyAndAttempts(t *testing.T) {
 	}
 }
 
+func TestRun_HalfCloseHold_ReachesExpectedActivePeak(t *testing.T) {
+	srv := newTestTCPServer(t)
+	defer srv.Close()
+
+	host, port := splitAddr(t, srv.Addr())
+	sc := scenario.Scenario{
+		Version:  scenario.VersionV1,
+		Name:     "half-close-hold",
+		Protocol: scenario.ProtocolTCP,
+		Target: scenario.Target{
+			Host: host,
+			Port: port,
+		},
+		Workload: scenario.Workload{
+			Pattern:           scenario.PatternHalfCloseHold,
+			Connections:       15,
+			ConnectRatePerSec: 150,
+			Duration:          scenario.Duration(700 * time.Millisecond),
+			HoldTime:          scenario.Duration(500 * time.Millisecond),
+		},
+		Timeouts: scenario.Timeouts{Connect: scenario.Duration(300 * time.Millisecond)},
+		Assertions: scenario.Assertions{
+			MaxErrorRatePct: 0,
+			MaxP95ConnectMs: 100,
+		},
+		Safety: scenario.Safety{
+			MaxConnectionsCap: 100,
+			PrivateOnly:       boolPtr(true),
+		},
+		Output: scenario.Output{ReportDir: t.TempDir()},
+	}
+
+	eng := New()
+	result, err := eng.Run(context.Background(), sc, RunOptions{})
+	if err != nil {
+		t.Fatalf("run failed: %v", err)
+	}
+
+	if result.Metrics.ActivePeak != 15 {
+		t.Fatalf("expected active peak 15, got %d", result.Metrics.ActivePeak)
+	}
+	if !result.Assertions.Passed {
+		t.Fatalf("expected assertions pass, got failures: %v", result.Assertions.Failures)
+	}
+}
+
 func TestRun_UnreachablePort_ClassifiesRefusedAndFailsAssertion(t *testing.T) {
 	port := closedLocalPort(t)
 	sc := scenario.Scenario{

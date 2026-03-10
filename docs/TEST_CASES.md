@@ -129,6 +129,7 @@ go run ./cmd/lazy-tests run -f examples/scenarios/postgres-hold-open-heavy.yaml
 ### LAB-CW-01: CLOSE_WAIT accumulation
 
 - Why hybrid: `CLOSE_WAIT` depends on server app behavior (not just connect churn).
+- Use `half-close-hold` profile for a stable plateau instead of short-lived churn spikes.
 - Steps:
 
 ```bash

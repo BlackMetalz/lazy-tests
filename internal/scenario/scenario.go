@@ -21,6 +21,7 @@ const (
 	ProtocolPostgres          = "postgres"
 	PatternHoldOpen           = "hold-open"
 	PatternConnectChurn       = "connect-churn"
+	PatternHalfCloseHold      = "half-close-hold"
 	defaultConnectTimeout     = 2 * time.Second
 	defaultConnectionsCap     = 5000
 	defaultReportDirectory    = "./reports"
@@ -208,7 +209,7 @@ func (s *Scenario) Validate() error {
 	}
 
 	switch s.Workload.Pattern {
-	case PatternHoldOpen, PatternConnectChurn:
+	case PatternHoldOpen, PatternConnectChurn, PatternHalfCloseHold:
 	default:
 		return fmt.Errorf("unsupported workload.pattern %q", s.Workload.Pattern)
 	}
@@ -224,6 +225,14 @@ func (s *Scenario) Validate() error {
 	}
 	if s.Workload.HoldTime.Value() < 0 {
 		return errors.New("workload.hold_time must be >= 0")
+	}
+	if s.Workload.Pattern == PatternHalfCloseHold {
+		if s.Protocol != ProtocolTCP {
+			return errors.New("workload.pattern half-close-hold requires protocol tcp")
+		}
+		if s.Workload.HoldTime.Value() <= 0 {
+			return errors.New("workload.hold_time must be > 0 for half-close-hold")
+		}
 	}
 
 	if s.Timeouts.Connect.Value() <= 0 {

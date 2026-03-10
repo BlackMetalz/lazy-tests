@@ -42,3 +42,14 @@ func (s *session) Close() error {
 	}
 	return s.conn.Close()
 }
+
+func (s *session) CloseWrite() error {
+	if s.conn == nil {
+		return nil
+	}
+	tcpConn, ok := s.conn.(*net.TCPConn)
+	if !ok {
+		return fmt.Errorf("tcp session does not support CloseWrite")
+	}
+	return tcpConn.CloseWrite()
+}

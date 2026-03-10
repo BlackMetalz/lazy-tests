@@ -164,3 +164,55 @@ output:
 		t.Fatalf("expected default prometheus listen addr")
 	}
 }
+
+func TestParse_HalfCloseHoldRequiresTCP(t *testing.T) {
+	yaml := `
+version: v1
+name: half-close-on-redis
+protocol: redis
+target:
+  host: 127.0.0.1
+  port: 6379
+workload:
+  pattern: half-close-hold
+  connections: 10
+  connect_rate_per_sec: 10
+  duration: 1s
+  hold_time: 1s
+timeouts:
+  connect: 1s
+safety:
+  max_connections_cap: 100
+`
+
+	_, err := Parse([]byte(yaml))
+	if err == nil || !strings.Contains(err.Error(), "requires protocol tcp") {
+		t.Fatalf("expected tcp-only validation error, got: %v", err)
+	}
+}
+
+func TestParse_HalfCloseHoldRequiresHoldTime(t *testing.T) {
+	yaml := `
+version: v1
+name: half-close-no-hold
+protocol: tcp
+target:
+  host: 127.0.0.1
+  port: 18080
+workload:
+  pattern: half-close-hold
+  connections: 10
+  connect_rate_per_sec: 10
+  duration: 1s
+  hold_time: 0s
+timeouts:
+  connect: 1s
+safety:
+  max_connections_cap: 100
+`
+
+	_, err := Parse([]byte(yaml))
+	if err == nil || !strings.Contains(err.Error(), "hold_time must be > 0 for half-close-hold") {
+		t.Fatalf("expected hold_time validation error, got: %v", err)
+	}
+}

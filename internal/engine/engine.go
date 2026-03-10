@@ -135,6 +135,8 @@ func (e *Engine) Run(ctx context.Context, sc scenario.Scenario, opts RunOptions)
 		e.runConnectChurn(runCtx, drv, sc, target, events)
 	case scenario.PatternHoldOpen:
 		e.runHoldOpen(runCtx, drv, sc, target, events)
+	case scenario.PatternHalfCloseHold:
+		e.runHalfCloseHold(runCtx, drv, sc, target, events)
 	default:
 		close(events)
 		aggWG.Wait()
@@ -243,6 +245,89 @@ func (e *Engine) runHoldOpen(
 			}
 
 			events <- event{connected: 1, activeDelta: 1, latencyMs: latencyMs}
+
+			remaining := time.Until(deadline)
+			if remaining < 0 {
+				remaining = 0
+			}
+
+			waitFor := remaining
+			if holdTime > 0 && holdTime < waitFor {
+				waitFor = holdTime
+			}
+
+			if waitFor > 0 {
+				select {
+				case <-ctx.Done():
+				case <-time.After(waitFor):
+				}
+			}
+
+			_ = sess.Close()
+			events <- event{activeDelta: -1}
+		}()
+	}
+
+	for attempts < total {
+		select {
+		case <-ctx.Done():
+			wg.Wait()
+			return
+		case <-ticker.C:
+			spawnAttempt()
+		}
+	}
+
+	<-ctx.Done()
+	wg.Wait()
+}
+
+func (e *Engine) runHalfCloseHold(
+	ctx context.Context,
+	drv driver.Driver,
+	sc scenario.Scenario,
+	target driver.Target,
+	events chan<- event,
+) {
+	interval := rateInterval(sc.Workload.ConnectRatePerSec)
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	var wg sync.WaitGroup
+	attempts := 0
+	total := sc.Workload.Connections
+
+	holdTime := sc.Workload.HoldTime.Value()
+	deadline := time.Now().Add(sc.Workload.Duration.Value())
+
+	spawnAttempt := func() {
+		attempts++
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			events <- event{attempted: 1}
+
+			start := time.Now()
+			sess, err := drv.Connect(ctx, target, sc.Timeouts.Connect.Value())
+			latencyMs := durationMs(time.Since(start))
+			if err != nil {
+				events <- event{failed: 1, errorType: ClassifyError(err)}
+				return
+			}
+
+			events <- event{connected: 1, activeDelta: 1, latencyMs: latencyMs}
+
+			halfClosable, ok := sess.(driver.HalfClosable)
+			if !ok {
+				_ = sess.Close()
+				events <- event{failed: 1, errorType: "other", activeDelta: -1}
+				return
+			}
+			if err := halfClosable.CloseWrite(); err != nil {
+				_ = sess.Close()
+				events <- event{failed: 1, errorType: ClassifyError(err), activeDelta: -1}
+				return
+			}
 
 			remaining := time.Until(deadline)
 			if remaining < 0 {

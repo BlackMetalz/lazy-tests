@@ -42,6 +42,7 @@ Important:
 - A successful `lazy-tests` run is expected here.
 - The signal is server-side `CLOSE_WAIT`, not client-side failure.
 - In leak mode, default `-leak-read-timeout=0` waits indefinitely for peer FIN so sockets are less likely to fall back into `LAST_ACK` due timeout.
+- Prefer `half-close-hold` scenarios for stable `CLOSE_WAIT` plateaus. With pure churn, counts can peak then decay depending on client kernel FIN_WAIT2 reaping behavior.
 - Direct check on Linux:
 
 ```bash

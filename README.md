@@ -109,11 +109,11 @@ auth:            # optional for tcp
   redis_db: 0     # redis only
 
 workload:
-  pattern: connect-churn # hold-open | connect-churn
+  pattern: connect-churn # hold-open | connect-churn | half-close-hold (tcp only)
   connections: 500
   connect_rate_per_sec: 200
   duration: 45s
-  hold_time: 20s         # only used in hold-open
+  hold_time: 20s         # used in hold-open and half-close-hold
 
 timeouts:
   connect: 2s

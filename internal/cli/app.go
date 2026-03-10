@@ -218,7 +218,7 @@ func (a *App) printDryRunPlan(sc scenario.Scenario) {
 	fmt.Fprintf(a.stdout, "  connections: %d\n", sc.Workload.Connections)
 	fmt.Fprintf(a.stdout, "  connect_rate_per_sec: %d\n", sc.Workload.ConnectRatePerSec)
 	fmt.Fprintf(a.stdout, "  duration: %s\n", sc.Workload.Duration)
-	if sc.Workload.Pattern == scenario.PatternHoldOpen {
+	if sc.Workload.Pattern == scenario.PatternHoldOpen || sc.Workload.Pattern == scenario.PatternHalfCloseHold {
 		fmt.Fprintf(a.stdout, "  hold_time: %s\n", sc.Workload.HoldTime)
 	}
 }

@@ -5,14 +5,15 @@ target:
   host: 127.0.0.1
   port: 18080
 workload:
-  pattern: connect-churn
-  connections: 600
-  connect_rate_per_sec: 120
-  duration: 3m
+  pattern: half-close-hold
+  connections: 1200
+  connect_rate_per_sec: 150
+  duration: 5m
+  hold_time: 5m
 timeouts:
   connect: 2s
 assertions:
-  max_error_rate_pct: 40
+  max_error_rate_pct: 30
   max_p95_connect_ms: 500
 safety:
   max_connections_cap: 3000

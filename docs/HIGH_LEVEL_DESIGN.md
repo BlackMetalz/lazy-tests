@@ -31,6 +31,7 @@
 - Core scheduler/executor for workload patterns:
   - `hold-open`
   - `connect-churn`
+  - `half-close-hold` (tcp only)
 - Event-based aggregation for counters/latency/error types.
 - Assertion evaluation.
 - Best-effort socket state probing (`ESTABLISHED`, `TIME_WAIT`).
@@ -58,6 +59,7 @@
 - Native `lazy-tests` scenarios cover connection-oriented stress:
   - churn and TIME_WAIT pressure
   - high ESTABLISHED hold-open
+  - stable server-side CLOSE_WAIT generation via client half-close
   - DB connect storms (MySQL/Redis/Postgres)
 - Hybrid lab helpers cover states that require external topology/behavior:
   - deliberate `CLOSE_WAIT` accumulation (`labs/high-conntrack`)
