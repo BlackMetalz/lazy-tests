@@ -87,9 +87,27 @@ CMD
       ;;
     LAB-RTR-01)
       cat <<'CMD'
-sudo tc qdisc add dev eth0 root netem delay 80ms 20ms loss 3%
-curl --http1.1 -L http://speedtest.tele2.net/1GB.zip -o /dev/null
-sudo tc qdisc del dev eth0 root
+# terminal 1 (target host)
+go run ./labs/high-conntrack/server -listen :18080 -hold 300ms -write-delay 50ms -stats-every 1s -log-every 1000
+
+# terminal 2 (target host)
+ip route get <CLIENT_IP>
+sudo tc qdisc add dev <TARGET_INTERFACE> root netem delay 80ms 20ms loss 3%
+
+# terminal 3 (client host baseline)
+go run ./labs/high-conntrack/client -target "${TARGET_HOST:-127.0.0.1}:18080" -total 20 -concurrency 1 -timeout 5s -read-reply
+
+# terminal 4 (client host traffic)
+go run ./labs/high-conntrack/client -target "${TARGET_HOST:-127.0.0.1}:18080" -total 5000 -concurrency 100 -timeout 5s -read-reply -delay 5ms
+
+# optional scale-up:
+# go run ./labs/high-conntrack/client -target "${TARGET_HOST:-127.0.0.1}:18080" -total 20000 -concurrency 400 -timeout 5s -read-reply -delay 2ms
+
+# cleanup:
+# sudo tc qdisc del dev <TARGET_INTERFACE> root
+
+# note:
+# LOW SAMPLE is still valid until holyf reaches enough ESTABLISHED/out-seg samples.
 CMD
       ;;
     LAB-MIT-01)

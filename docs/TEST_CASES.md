@@ -175,17 +175,26 @@ docker compose -f labs/nat/docker-compose.yml down
 ### LAB-RTR-01: retransmission thresholds
 
 - Why hybrid: retrans spikes require path impairment or sustained payload traffic.
+- Acceptance note: holyf can legitimately stay in `LOW SAMPLE` until retrans scoring has enough data.
 - Steps:
 
 ```bash
-sudo tc qdisc add dev eth0 root netem delay 80ms 20ms loss 3%
-curl --http1.1 -L http://speedtest.tele2.net/1GB.zip -o /dev/null
-sudo tc qdisc del dev eth0 root
+go run ./labs/high-conntrack/server -listen :18080 -hold 300ms -write-delay 50ms -stats-every 1s -log-every 1000
+ip route get <CLIENT_IP>
+go run ./labs/high-conntrack/client -target <TARGET_HOST>:18080 -total 20 -concurrency 1 -timeout 5s -read-reply
+sudo tc qdisc add dev <TARGET_INTERFACE> root netem delay 80ms 20ms loss 3%
+go run ./labs/high-conntrack/client -target <TARGET_HOST>:18080 -total 5000 -concurrency 100 -timeout 5s -read-reply -delay 5ms
+# optional scale-up:
+# go run ./labs/high-conntrack/client -target <TARGET_HOST>:18080 -total 20000 -concurrency 400 -timeout 5s -read-reply -delay 2ms
+# cleanup:
+# sudo tc qdisc del dev <TARGET_INTERFACE> root
 ```
 
 - Expected in holyf:
   - retrans rate and retrans percent increase.
-  - threshold status can move into warn/crit depending on health config.
+  - health strip may remain `LOW SAMPLE` until sample gates are met.
+  - with current holyf thresholds, scoring starts only once `ESTABLISHED >= 20` and `OutSegs/sec >= 60`.
+  - threshold status can move into warn/crit only after those gates are met.
 
 ### LAB-MIT-01: block/kill convergence under storm
 
