@@ -121,6 +121,8 @@ type PrometheusOutput struct {
 }
 
 type Overrides struct {
+	Host              string
+	Port              int
 	Duration          string
 	Connections       int
 	ConnectRatePerSec int
@@ -150,6 +152,14 @@ func Load(path string) (*Scenario, error) {
 }
 
 func (s *Scenario) ApplyOverrides(o Overrides) error {
+	if strings.TrimSpace(o.Host) != "" {
+		s.Target.Host = strings.TrimSpace(o.Host)
+	}
+
+	if o.Port > 0 {
+		s.Target.Port = o.Port
+	}
+
 	if o.Duration != "" {
 		parsed, err := time.ParseDuration(o.Duration)
 		if err != nil {
@@ -318,6 +328,11 @@ func isPrivateIP(ip net.IP) bool {
 	if !ok {
 		return false
 	}
+
+	// net.ParseIP always returns a 16-byte slice even for IPv4 addresses,
+	// which makes AddrFromSlice return an IPv4-in-IPv6 form where IsPrivate()
+	// won't match RFC 1918 ranges. Unmap() converts it to a plain IPv4 addr first.
+	addr = addr.Unmap()
 
 	if addr.IsPrivate() {
 		return true

@@ -62,6 +62,8 @@ func (a *App) runCommand(args []string) int {
 	var duration string
 	var connections int
 	var connectRate int
+	var targetHost string
+	var targetPort int
 	var dryRun bool
 	var unsafePublic bool
 
@@ -71,6 +73,8 @@ func (a *App) runCommand(args []string) int {
 	fs.StringVar(&duration, "duration", "", "override workload duration (e.g. 30s)")
 	fs.IntVar(&connections, "connections", 0, "override workload connections")
 	fs.IntVar(&connectRate, "connect-rate-per-sec", 0, "override connect rate per second")
+	fs.StringVar(&targetHost, "target-host", "", "override target host")
+	fs.IntVar(&targetPort, "target-port", 0, "override target port")
 	fs.BoolVar(&dryRun, "dry-run", false, "validate and print execution plan without opening sockets")
 	fs.BoolVar(&unsafePublic, "unsafe-public-target", false, "allow public target hosts")
 
@@ -90,6 +94,8 @@ func (a *App) runCommand(args []string) int {
 	}
 
 	overrides := scenario.Overrides{
+		Host:              targetHost,
+		Port:              targetPort,
 		Duration:          duration,
 		Connections:       connections,
 		ConnectRatePerSec: connectRate,
@@ -198,7 +204,7 @@ func (a *App) listCommand(args []string) int {
 func (a *App) printRootUsage() {
 	fmt.Fprintln(a.stderr, "lazy-tests v0.3")
 	fmt.Fprintln(a.stderr, "usage:")
-	fmt.Fprintln(a.stderr, "  lazy-tests run -f scenario.yaml [--out ./reports] [--dry-run] [--unsafe-public-target]")
+	fmt.Fprintln(a.stderr, "  lazy-tests run -f scenario.yaml [--target-host HOST] [--target-port PORT] [--out ./reports] [--dry-run] [--unsafe-public-target]")
 	fmt.Fprintln(a.stderr, "  lazy-tests validate -f scenario.yaml")
 	fmt.Fprintln(a.stderr, "  lazy-tests list drivers")
 }
